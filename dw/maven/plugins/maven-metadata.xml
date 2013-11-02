@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <plugins>
+    <plugin>
+      <name>dw-closure-compiler-plugin</name>
+      <prefix>dw-closure-compiler</prefix>
+      <artifactId>dw-closure-compiler-plugin</artifactId>
+    </plugin>
+  </plugins>
+</metadata>
