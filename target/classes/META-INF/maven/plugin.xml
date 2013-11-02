@@ -4,7 +4,7 @@
   <description>Sonatype helps open source projects to set up Maven repositories on https://oss.sonatype.org/</description>
   <groupId>dw.maven.plugins</groupId>
   <artifactId>dw-closure-compiler-plugin</artifactId>
-  <version>0.9.0</version>
+  <version>1.0.0</version>
   <goalPrefix>dw-closure-compiler</goalPrefix>
   <isolatedRealm>false</isolatedRealm>
   <inheritedByDefault>true</inheritedByDefault>
@@ -33,18 +33,25 @@
           <description>Compilation level.</description>
         </parameter>
         <parameter>
-          <name>input_dir</name>
+          <name>inputDir</name>
           <type>java.io.File</type>
           <required>false</required>
           <editable>true</editable>
           <description>Js directory.</description>
         </parameter>
         <parameter>
-          <name>output_dir</name>
+          <name>outputDir</name>
           <type>java.io.File</type>
           <required>false</required>
           <editable>true</editable>
           <description>Js output directory.</description>
+        </parameter>
+        <parameter>
+          <name>recursive</name>
+          <type>boolean</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Recursive.</description>
         </parameter>
         <parameter>
           <name>version</name>
@@ -56,8 +63,9 @@
       </parameters>
       <configuration>
         <compilation_level implementation="java.lang.String" default-value="SIMPLE_OPTIMIZATIONS">${compilation.level}</compilation_level>
-        <input_dir implementation="java.io.File">${input_dir}</input_dir>
-        <output_dir implementation="java.io.File">${output_dir}</output_dir>
+        <inputDir implementation="java.io.File">${inputDir}</inputDir>
+        <outputDir implementation="java.io.File">${outputDir}</outputDir>
+        <recursive implementation="boolean" default-value="true">${recursive}</recursive>
         <version implementation="java.lang.String">${version}</version>
       </configuration>
     </mojo>

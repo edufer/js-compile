@@ -3,7 +3,7 @@
 
     <groupId>dw.maven.plugins</groupId>
     <artifactId>dw-closure-compiler-plugin</artifactId>
-    <version>0.9.0</version>
+    <version>1.0.0</version>
     <packaging>maven-plugin</packaging>
 
     <name>dw-closure-compiler-plugin</name>
@@ -16,9 +16,9 @@
 
 	  <distributionManagement>
 	    <repository>
-	      <id>github</id>
+	      <id>https://github.com/edufer/public/tree/master</id>
 	      <name>Repository</name>
-	      <url>https://raw.github.com/edufer/js-compile/</url>
+	      <url>https://github.com/edufer/public/tree/master</url>
 	    </repository>
 	  </distributionManagement>
 

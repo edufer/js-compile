@@ -4,7 +4,6 @@ import org.apache.maven.plugin.logging.Log;
 
 /**
  * Mojo logger.
- * @author mischa
  */
 public class MojoLogger implements Log {
 	

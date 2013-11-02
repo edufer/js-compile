@@ -1,9 +1,11 @@
 package com.dw.maven.plugins;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
+import java.util.Collection;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -21,15 +23,15 @@ public class ClosureCompilerMojo extends AbstractMojo {
 
     /**
      * Js directory.
-     * @parameter expression="${input_dir}"
+     * @parameter expression="${inputDir}"
      */
-    private File input_dir;
+    private File inputDir;
 
     /**
      * Js output directory.
-     * @parameter expression="${output_dir}"
+     * @parameter expression="${outputDir}"
      */
-    private File output_dir;
+    private File outputDir;
 
     /**
      * Version.
@@ -37,6 +39,11 @@ public class ClosureCompilerMojo extends AbstractMojo {
      */
     private String version;
 
+    /**
+     * Recursive.
+     * @parameter expression="${recursive}" default-value="true"
+     */
+    private boolean recursive;
 
     /**
      * Execute.
@@ -45,8 +52,10 @@ public class ClosureCompilerMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         SecurityManager defaultSecurityManager = System.getSecurityManager();
         System.setSecurityManager(new NoExitSecurityManager()); // needed because System.exit is called by the runner.
-        if (isValid(input_dir) && isValid(output_dir)) {
-            for (File js : input_dir.listFiles(new JsFilenameFilter())) {
+        if (isValid(inputDir) && isValid(outputDir)) {
+            getLog().info("Scanning input directory: " + inputDir.getPath() + ". Recursive mode = " + recursive);
+            Collection<File> inputFiles = FileUtils.listFiles(inputDir, new String[] {"js"}, recursive);
+            for (File js : inputFiles) {
                 compile(js);
             }
         } else {
@@ -61,8 +70,7 @@ public class ClosureCompilerMojo extends AbstractMojo {
      */
     private void compile(final File js) {
         final Boolean useVersion = isEmpty(version) ? false : true;
-        final String fileName = js.getName();
-        final String target = targetPath(useVersion, fileName);
+        final String target = targetPath(useVersion, js);
         final String source = sourcePath(js);
         final ClosureCompilerRunner runner = new ClosureCompilerRunner(compilation_level, source, target);
         if (runner.shouldRunCompiler()) {
@@ -90,8 +98,12 @@ public class ClosureCompilerMojo extends AbstractMojo {
      * @param fileName The filename.
      * @return target The target.
      */
-    private String targetPath(final Boolean useVersion, final String fileName) {
-        final StringBuilder builder = new StringBuilder(output_dir.getPath());
+    private String targetPath(final Boolean useVersion, final File inputFile) {
+        final StringBuilder builder = new StringBuilder(outputDir.getPath());
+        
+        String inputFilePath = inputFile.getPath();
+        String fileName = inputFilePath.substring(inputDir.getPath().length());
+        
         builder.append(File.separator);
         builder.append(useVersion ? fileName.replace(".js", "-" + version + ".js") : fileName);
         return builder.toString();
