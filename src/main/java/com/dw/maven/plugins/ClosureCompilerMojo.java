@@ -5,7 +5,10 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -44,6 +47,12 @@ public class ClosureCompilerMojo extends AbstractMojo {
      * @parameter expression="${recursive}" default-value="true"
      */
     private boolean recursive;
+    
+    /**
+     * Excludes patterns (regexp)
+     * @parameter alias="excludes"
+     */
+    private String[] excludes;
 
     /**
      * Execute.
@@ -54,8 +63,21 @@ public class ClosureCompilerMojo extends AbstractMojo {
         System.setSecurityManager(new NoExitSecurityManager()); // needed because System.exit is called by the runner.
         if (isValid(inputDir) && isValid(outputDir)) {
             getLog().info("Scanning input directory: " + inputDir.getPath() + ". Recursive mode = " + recursive);
+            
+            // generates the exclude patterns
+            ArrayList<Pattern> patterns = computePatterns();
+            if (patterns == null) {
+            	return;
+            }
+            
             Collection<File> inputFiles = FileUtils.listFiles(inputDir, new String[] {"js"}, recursive);
             for (File js : inputFiles) {
+            	
+            	// checks if the file is excluded
+            	if (isExcluded(js, patterns)) {
+            		continue;
+            	}
+            	
                 compile(js);
             }
         } else {
@@ -65,6 +87,55 @@ public class ClosureCompilerMojo extends AbstractMojo {
     }
 
     /**
+     * Checks if a file is included in the exclusion list
+     * @param js
+     * @param patterns
+     * @return
+     */
+    private boolean isExcluded(File js, ArrayList<Pattern> patterns) {
+    	
+    	// gets the file path
+    	String path = js.getPath();
+    	
+    	for (Pattern pattern:patterns) {
+    		if (pattern.matcher(path).find()) {
+    			getLog().info("Ignoring file: " + path);
+    			return true;
+    		}
+    	}
+    	
+    	// not found
+    	return false;
+	}
+
+	/**
+	 * Lets compile the patterns
+	 * @return The compiled pattern array
+	 */
+	private ArrayList<Pattern> computePatterns() {
+		ArrayList<Pattern> patterns = new ArrayList<Pattern>();
+		
+		if (excludes == null) {
+			getLog().warn("No exclude pattern defined");
+			return patterns;
+		}
+		
+		// lets compile each pattern
+		for (String pattern: excludes) {
+			try {
+				getLog().info("Excluding: " + pattern);
+				Pattern newPattern = Pattern.compile(pattern);
+				patterns.add(newPattern);
+			} catch (PatternSyntaxException e) {
+				getLog().error("Invalid regexp expression: " + pattern + ". Aborting javascript compilation.");
+				return null;
+			}
+		}
+		
+		return patterns;
+	}
+
+	/**
      * Run the compile.
      * @param js The js to compile.
      */
